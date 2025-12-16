@@ -1,0 +1,26 @@
+/project
+│
+├── /views/             ← HTML principal
+│     ├── index.html
+│     ├── login.html
+│     ├── dashboard.html
+│     └── ...
+│
+├── /assets/
+│     ├── /css/
+│     │     └── styles.css  ←  Opcional no creo ocuparlo
+│     ├── /js/
+│     │     ├── app.js
+│     │     └── auth.js
+│     └── /img/
+│
+├── /api/               ← PHP del backend
+│     ├── db.php
+│     ├── login.php
+│     ├── registrar.php
+│     └── ...
+│
+├── /config/
+│     └── config.php    ← Constantes, rutas, configuración general con el server
+│
+└── /README.md
