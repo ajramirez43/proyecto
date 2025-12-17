@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>VitalSync - Cuidadores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script> 
+    <script>
+        tailwind.config = { theme: { extend: { colors: { primary: "#4338ca" }, fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
+</head>
+<body class="bg-slate-50 flex h-screen font-sans text-slate-900">
+
+    <aside class="w-64 bg-white border-r flex flex-col fixed h-full z-20">
+        <div class="p-6 border-b flex items-center gap-2">
+            <i data-lucide="activity" class="text-primary w-8 h-8"></i>
+            <span class="font-bold text-2xl text-slate-800">VitalSync</span>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="layout-grid" class="w-6 h-6"></i> Panel</a>
+            <a href="historial.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="file-text" class="w-6 h-6"></i> Historial</a>
+            <a href="medicamentos.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="pill" class="w-6 h-6"></i> Medicamentos</a>
+            <a href="sintomas.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="clipboard-list" class="w-6 h-6"></i> Síntomas</a>
+            <a href="perfil.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="user" class="w-6 h-6"></i> Perfil</a>
+            <a href="cuidador.html" class="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-primary rounded-xl font-bold text-lg shadow-sm"><i data-lucide="users" class="w-6 h-6"></i> Cuidador</a>
+        </nav>
+    </aside>
+
+    <main class="ml-64 p-8 w-full overflow-y-auto h-full">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-800">Red de Cuidadores</h2>
+                <p class="text-gray-500 text-lg">Gestiona quién tiene acceso a tu información de salud.</p>
+            </div>
+            <button id="btnInvitarCuidador" class="bg-primary hover:bg-indigo-800 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 transition-all font-bold text-lg transform active:scale-95">
+                <i data-lucide="mail-plus" class="w-6 h-6"></i> Invitar
+            </button>
+        </header>
+
+        <div id="caregiverList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+        
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center p-12 text-gray-400 mt-8">
+            <div class="bg-slate-100 p-6 rounded-full mb-4">
+                <i data-lucide="users" class="w-12 h-12 opacity-50"></i>
+            </div>
+            <p class="text-xl font-medium">No tienes cuidadores asignados.</p>
+            <p class="text-sm mt-1">Invita a un familiar para que reciba alertas en tiempo real.</p>
+        </div>
+    </main>
+    
+    <script type="module" src="../assets/js/system-alarms.js"></script>
+    <script type="module" src="../assets/js/cuidador.js"></script>
+</body>
+</html>

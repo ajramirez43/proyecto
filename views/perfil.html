@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>VitalSync - Perfil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = { theme: { extend: { colors: { primary: "#4338ca", secondary: "#64748b" }, fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
+</head>
+<body class="bg-slate-50 flex h-screen font-sans text-slate-900">
+
+    <aside class="w-64 bg-white border-r flex flex-col fixed h-full z-20">
+        <div class="p-6 border-b flex items-center gap-2">
+            <i data-lucide="activity" class="text-primary w-8 h-8"></i>
+            <span class="font-bold text-2xl text-slate-800">VitalSync</span>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i> Dashboard
+            </a>
+            <a href="historial.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors">
+                <i data-lucide="heart-pulse" class="w-6 h-6"></i> Historial
+            </a>
+            <a href="medicamentos.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors">
+                <i data-lucide="pill" class="w-6 h-6"></i> Medicamentos
+            </a>
+            <a href="sintomas.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors">
+                <i data-lucide="thermometer" class="w-6 h-6"></i> Síntomas
+            </a>
+            <a href="cuidador.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors">
+                <i data-lucide="users" class="w-6 h-6"></i> Cuidador
+            </a>
+            <a href="perfil.html" class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-bold text-lg shadow-sm transition-colors">
+                <i data-lucide="user" class="w-6 h-6"></i> Perfil
+            </a>
+        </nav>
+        <div class="p-4 border-t">
+            <button onclick="cerrarSesion()" class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl w-full font-medium text-lg transition-colors">
+                <i data-lucide="log-out" class="w-6 h-6"></i> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-8 overflow-y-auto">
+        <header class="mb-8 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-slate-800">Mi Perfil</h1>
+            </header>
+
+        <div class="max-w-3xl mx-auto bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-slate-200">
+            <form id="profileForm" class="space-y-6">
+
+                <div class="border-b border-slate-100 pb-5 mb-5 space-y-4">
+                    <h2 class="text-xl font-bold text-primary flex items-center gap-2"><i data-lucide="user-circle" class="w-6 h-6"></i> Datos Personales</h2>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-2">Nombre Completo</label>
+                            <input id="name" type="text" placeholder="Ej. Juan Pérez" required class="w-full p-4 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-primary transition-all text-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-2">Edad</label>
+                            <input id="age" type="number" placeholder="35" required class="w-full p-4 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-primary transition-all text-slate-700">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-600 mb-2">Correo Electrónico</label>
+                        <input id="email" type="email" disabled class="w-full p-4 bg-slate-100 border border-slate-300 rounded-xl outline-none text-slate-500 transition-all cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div class="border-b border-slate-100 pb-5 mb-5 space-y-4">
+                    <h2 class="text-xl font-bold text-rose-600 flex items-center gap-2"><i data-lucide="heart" class="w-6 h-6"></i> Condiciones y Monitoreo</h2>
+                    <div class="bg-rose-50 p-4 rounded-xl space-y-3">
+                        <p class="text-sm font-bold text-slate-700">Condiciones Principales:</p>
+                        <div class="flex flex-wrap gap-6">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="hyp" class="w-5 h-5 text-rose-500 rounded focus:ring-rose-500"> 
+                                <span class="text-slate-700 font-medium">Hipertensión</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="diab" class="w-5 h-5 text-rose-500 rounded focus:ring-rose-500"> 
+                                <span class="text-slate-700 font-medium">Diabetes</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-teal-50 p-4 rounded-xl space-y-3">
+                        <p class="text-sm font-bold text-slate-700">Dispositivos de Monitoreo:</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="chkPulse" class="w-5 h-5 text-teal-500 rounded focus:ring-teal-500"> 
+                                <span class="text-slate-700 font-medium">Pulso (BPM)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="chkTemp" class="w-5 h-5 text-teal-500 rounded focus:ring-teal-500"> 
+                                <span class="text-slate-700 font-medium">Temperatura Corporal</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="chkOxi" class="w-5 h-5 text-teal-500 rounded focus:ring-teal-500"> 
+                                <span class="text-slate-700 font-medium">Saturación de Oxígeno</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h2 class="text-xl font-bold text-amber-600 flex items-center gap-2"><i data-lucide="clipboard" class="w-6 h-6"></i> Información Adicional</h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-2">Contacto de Emergencia</label>
+                            <input id="emerName" type="text" class="w-full p-4 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-primary transition-all text-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-2">Teléfono de Emergencia</label>
+                            <input id="emerPhone" type="tel" class="w-full p-4 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-primary transition-all text-slate-700">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-600 mb-2">Notas Médicas / Alergias</label>
+                        <textarea id="note" class="w-full p-4 border border-slate-300 rounded-xl h-32 outline-none focus:ring-2 focus:ring-primary resize-none transition-all text-slate-700"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t border-slate-50">
+                    <button type="submit" id="btnSave" class="bg-primary hover:bg-indigo-800 text-white px-8 py-3 rounded-xl shadow-lg shadow-indigo-200 font-bold text-lg transition-all flex items-center gap-2 transform active:scale-95">
+                        <i data-lucide="save" class="w-5 h-5"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <script type="module" src="../assets/js/perfil.js"></script>
+    <script type="module" src="../assets/js/system-alarms.js"></script>
+</body>
+</html>

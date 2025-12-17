@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalSync - Historial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script>tailwind.config = { theme: { extend: { colors: { primary: "#4338ca", secondary: "#64748b" }, fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+    <style>
+        .active-tab { background-color: #4338ca; color: white; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .inactive-tab { background-color: white; color: #4b5563; border: 1px solid #e5e7eb; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        tr { transition: all 0.2s; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+
+    <div id="mobileOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity"></div>
+    <div class="md:hidden fixed top-0 left-0 w-full bg-white border-b z-20 p-4 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2"><i data-lucide="activity" class="text-primary w-6 h-6"></i><span class="font-bold text-xl text-slate-800">VitalSync</span></div>
+        <button onclick="toggleSidebar()" class="text-slate-600 hover:text-primary"><i data-lucide="menu" class="w-8 h-8"></i></button>
+    </div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="p-6 border-b flex items-center gap-2"><i data-lucide="activity" class="text-primary w-8 h-8"></i><span class="font-bold text-2xl text-slate-800">VitalSync</span><button onclick="toggleSidebar()" class="md:hidden ml-auto text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="layout-grid" class="w-6 h-6"></i> Panel</a>
+            <a href="historial.html" class="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-primary rounded-xl font-bold text-lg"><i data-lucide="file-text" class="w-6 h-6"></i> Historial</a>
+            <a href="medicamentos.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="pill" class="w-6 h-6"></i> Medicamentos</a>
+            <a href="sintomas.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="clipboard-list" class="w-6 h-6"></i> Síntomas</a>
+            <a href="perfil.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="user" class="w-6 h-6"></i> Perfil</a>
+            <a href="cuidador.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="users" class="w-6 h-6"></i> Cuidador</a>
+        </nav>
+        <div class="p-4 border-t space-y-2">
+            <button onclick="cerrarSesion()" class="flex items-center gap-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 w-full p-3 rounded-xl transition-colors font-bold">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <main class="min-h-screen p-4 pt-24 md:p-8 md:ml-64 transition-all min-w-0">
+        
+        <header class="flex flex-col gap-6 mb-8">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Historial Médico</h2>
+                    <p class="text-gray-500 text-sm md:text-lg">Consulta y gestiona tus registros.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                    <button onclick="abrirModalRetroactivo()" class="justify-center bg-indigo-100 text-primary hover:bg-indigo-200 px-5 py-3 rounded-xl flex items-center gap-2 font-bold transition-colors">
+                        <i data-lucide="calendar-plus" class="w-5 h-5"></i> Registrar Olvidado
+                    </button>
+                    <button onclick="abrirModalEnvioInforme()" class="justify-center bg-green-600 text-white hover:bg-green-700 px-5 py-3 rounded-xl flex items-center gap-2 font-bold shadow-lg transition-colors">
+                        <i data-lucide="send" class="w-5 h-5"></i> Enviar Informe
+                    </button>
+                    <button onclick="abrirOpcionesPDF()" class="justify-center bg-red-600 text-white hover:bg-red-700 px-5 py-3 rounded-xl flex items-center gap-2 font-bold shadow-lg transition-colors">
+                        <i data-lucide="file-down" class="w-5 h-5"></i> PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4">
+                <div class="flex flex-col sm:flex-row gap-4 items-end w-full xl:w-auto">
+                    <div class="flex-1 w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Desde</label>
+                        <input id="filtroInicio" type="date" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary outline-none font-bold text-slate-600">
+                    </div>
+                    <div class="flex-1 w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Hasta</label>
+                        <input id="filtroFin" type="date" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-primary outline-none font-bold text-slate-600">
+                    </div>
+                    <button onclick="aplicarFiltros()" class="w-full sm:w-auto bg-slate-800 text-white px-6 py-2.5 rounded-lg hover:bg-slate-700 transition-colors shadow-md flex items-center justify-center gap-2 font-bold text-sm">
+                        <i data-lucide="search" class="w-4 h-4"></i> Buscar
+                    </button>
+                </div>
+
+                <div class="flex bg-slate-100 p-1.5 rounded-xl gap-1 w-full xl:w-auto">
+                    <button id="btnVistaTabla" onclick="cambiarVista('tabla')" class="flex-1 xl:flex-none justify-center active-tab px-6 py-2.5 rounded-lg text-sm font-bold flex gap-2 items-center transition-all">
+                        <i data-lucide="table-2" class="w-4 h-4"></i> Tabla
+                    </button>
+                    <button id="btnVistaGrafica" onclick="cambiarVista('grafica')" class="flex-1 xl:flex-none justify-center inactive-tab px-6 py-2.5 rounded-lg text-sm font-bold flex gap-2 items-center transition-all hover:bg-white">
+                        <i data-lucide="line-chart" class="w-4 h-4"></i> Gráfica
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div id="vistaTabla" class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px]" id="tablaHistorial">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr id="headerTabla"></tr>
+                    </thead>
+                    <tbody id="tBody" class="text-sm text-slate-700 divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+            <div id="emptyState" class="hidden p-12 text-center text-gray-400">
+                <div class="bg-slate-50 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center"><i data-lucide="inbox" class="w-10 h-10 opacity-50"></i></div>
+                <p class="font-medium text-lg">No se encontraron registros</p>
+                <p class="text-sm mt-1">Prueba seleccionando otro rango.</p>
+            </div>
+        </div>
+
+        <div id="vistaGrafica" class="hidden bg-white p-4 md:p-6 rounded-2xl shadow-md border border-slate-200">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <h3 class="font-bold text-xl text-slate-800">Evolución en el Rango</h3>
+                <div id="chartTabs" class="flex gap-2 bg-slate-50 p-1 rounded-lg overflow-x-auto w-full sm:w-auto justify-start sm:justify-center scrollbar-hide"></div> 
+            </div>
+            <div class="h-64 md:h-96 w-full relative">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity p-4">
+        <form id="addForm" class="bg-white p-6 rounded-2xl w-full max-w-md space-y-5 shadow-2xl border border-slate-100 transform scale-100 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center"><h3 class="font-bold text-xl md:text-2xl text-slate-800">Registrar Olvidado</h3><button type="button" onclick="toggleModal(false)" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-2"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-sm text-amber-800 flex gap-3 items-start"><i data-lucide="alert-circle" class="w-5 h-5 mt-0.5 shrink-0 text-amber-600"></i><p>Estás registrando un dato pasado.</p></div>
+            <div><label class="block text-sm font-bold text-gray-600 mb-2">Fecha y Hora</label><input id="fechaRegistro" type="datetime-local" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 outline-none"></div>
+            <div id="group-bp" class="hidden space-y-2"><div class="flex items-center gap-2 text-sm font-bold text-rose-600 uppercase"><i data-lucide="heart-pulse" class="w-4"></i> Presión</div><div class="grid grid-cols-2 gap-4"><input id="sys" type="number" placeholder="Sist." class="border border-slate-300 rounded-xl p-3 w-full outline-none"><input id="dia" type="number" placeholder="Diast." class="border border-slate-300 rounded-xl p-3 w-full outline-none"></div></div>
+            <div id="group-pul" class="hidden space-y-2"><label class="text-sm font-bold text-indigo-600 uppercase">Pulso (BPM)</label><input id="pul" type="number" class="w-full border border-slate-300 rounded-xl p-3 outline-none"></div>
+            <div id="group-glu" class="hidden space-y-2"><label class="text-sm font-bold text-sky-600 uppercase">Glucosa</label><input id="glu" type="number" class="w-full border border-slate-300 rounded-xl p-3 outline-none"></div>
+            <div class="grid grid-cols-2 gap-4"><div id="group-temp" class="hidden"><label class="text-sm font-bold text-orange-500">Temp (°C)</label><input id="temp" type="number" step="0.1" class="border border-slate-300 rounded-xl p-3 w-full outline-none"></div><div id="group-oxi" class="hidden"><label class="text-sm font-bold text-teal-500">O2 (%)</label><input id="oxi" type="number" class="border border-slate-300 rounded-xl p-3 w-full outline-none"></div></div>
+            <button type="submit" class="w-full bg-primary text-white p-4 rounded-xl shadow-lg hover:bg-indigo-800 transition font-bold text-lg mt-2">Guardar</button>
+        </form>
+    </div>
+
+    <div id="modalEnvio" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity p-4">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md space-y-5 shadow-2xl border border-slate-100 transform scale-100 max-h-[85vh] overflow-y-auto">
+            
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-2xl text-slate-800">Enviar Informe</h3>
+                <button type="button" onclick="window.toggleModalEnvio(false)" class="text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-2">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 text-sm text-indigo-800 flex gap-3 items-start">
+                <i data-lucide="file-text" class="w-5 h-5 mt-0.5 shrink-0 text-indigo-600"></i>
+                <p>El informe se enviará como una tabla en el cuerpo del correo con los datos filtrados (sin adjuntos).</p>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-gray-600 mb-2">Seleccionar Destinatarios</label>
+                <div id="selectCuidadores" class="space-y-2 max-h-48 overflow-y-auto p-2 border border-slate-200 rounded-xl bg-slate-50">
+                    <p class="text-sm text-slate-400">Cargando cuidadores...</p>
+                </div>
+            </div>
+
+            <button type="button" onclick="enviarInformeACuidadores()" id="btnEnviarInforme" 
+                    class="w-full bg-primary text-white p-4 rounded-xl shadow-lg hover:bg-indigo-800 transition font-bold text-lg mt-4" disabled>
+                <i data-lucide="send" class="w-5 h-5"></i> Enviar por Email
+            </button>
+        </div>
+    </div>
+
+    <div style="position: absolute; left: -9999px;"><canvas id="pdfCanvas" width="800" height="300" style="background-color: white;"></canvas></div>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="module" src="../assets/js/system-alarms.js"></script>
+    <script type="module" src="../assets/js/historial.js"></script>
+    <script>
+        lucide.createIcons();
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

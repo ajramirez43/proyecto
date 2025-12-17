@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalSync - Síntomas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = { 
+            theme: { extend: { colors: { primary: "#4338ca", secondary: "#64748b" }, fontFamily: { sans: ['Inter', 'sans-serif'] } } } 
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900">
+
+    <div id="mobileOverlay" onclick="toggleSidebar()" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity"></div>
+
+    <div class="md:hidden fixed top-0 left-0 w-full bg-white border-b z-20 p-4 flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2">
+            <i data-lucide="activity" class="text-primary w-6 h-6"></i>
+            <span class="font-bold text-xl text-slate-800">VitalSync</span>
+        </div>
+        <button onclick="toggleSidebar()" class="text-slate-600 hover:text-primary">
+            <i data-lucide="menu" class="w-8 h-8"></i>
+        </button>
+    </div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white border-r flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="p-6 border-b flex items-center gap-2">
+            <i data-lucide="activity" class="text-primary w-8 h-8"></i>
+            <span class="font-bold text-2xl text-slate-800">VitalSync</span>
+            <button onclick="toggleSidebar()" class="md:hidden ml-auto text-gray-400"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="layout-grid" class="w-6 h-6"></i> Panel</a>
+            <a href="historial.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="file-text" class="w-6 h-6"></i> Historial</a>
+            <a href="medicamentos.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="pill" class="w-6 h-6"></i> Medicamentos</a>
+            <a href="sintomas.html" class="flex items-center gap-3 px-4 py-3 bg-indigo-50 text-primary rounded-xl font-bold text-lg shadow-sm"><i data-lucide="clipboard-list" class="w-6 h-6"></i> Síntomas</a>
+            <a href="perfil.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="user" class="w-6 h-6"></i> Perfil</a>
+            <a href="cuidador.html" class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium text-lg transition-colors"><i data-lucide="users" class="w-6 h-6"></i> Cuidador</a>
+        </nav>
+        <div class="p-4 border-t space-y-2">
+            <button onclick="cerrarSesion()" class="flex items-center gap-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 w-full p-3 rounded-xl transition-colors font-bold">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+
+    </aside>
+
+    <main class="min-h-screen p-4 pt-24 md:p-8 md:ml-64 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="flex flex-col gap-6 lg:col-span-1">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+                <header class="mb-6">
+                    <h2 class="font-bold text-2xl text-slate-800">¿Cómo te sientes?</h2>
+                    <p class="text-slate-500 text-sm">Registra tus síntomas.</p>
+                </header>
+                
+                <form id="symptomForm" class="space-y-6">
+                    <div class="flex gap-3">
+                        <div class="w-1/2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Fecha</label>
+                            <input id="fechaRegistro" type="date" class="w-full border border-slate-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Hora</label>
+                            <input id="horaRegistro" type="time" class="w-full border border-slate-300 rounded-xl p-3 outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <p class="text-sm font-bold text-indigo-600 border-b pb-1">Físicos / Dolor</p>
+                        <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"><input type="checkbox" class="chk w-5 h-5 text-primary rounded focus:ring-primary" value="Dolor de Cabeza"><span class="text-slate-700">🤕 Dolor de Cabeza</span></label>
+                        <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"><input type="checkbox" class="chk w-5 h-5 text-primary rounded" value="Mareo"><span class="text-slate-700">😵‍💫 Mareo</span></label>
+                        <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"><input type="checkbox" class="chk w-5 h-5 text-primary rounded" value="Fatiga"><span class="text-slate-700">😫 Fatiga</span></label>
+                        <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"><input type="checkbox" class="chk w-5 h-5 text-primary rounded" value="Dolor Articular"><span class="text-slate-700">🦴 Dolor Articular</span></label>
+
+                        <p class="text-sm font-bold text-indigo-600 border-b pb-1 mt-4">Digestivo / Otros</p>
+                        <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"><input type="checkbox" class="chk w-5 h-5 text-primary rounded" value="Náuseas"><span class="text-slate-700">🤢 Náuseas</span></label>
+                        <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"><input type="checkbox" class="chk w-5 h-5 text-primary rounded" value="Falta de Aire"><span class="text-slate-700">🫁 Falta de Aire</span></label>
+
+                        <div class="border-t pt-2 mt-2">
+                            <label class="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition"><input type="checkbox" id="chkOtro" class="chk w-5 h-5 text-primary rounded" value="OTRO" onchange="toggleOtroInput(this)"><span class="text-slate-700 font-bold">➕ Otro</span></label>
+                            <input id="inputOtroSintoma" type="text" placeholder="Especifique..." class="hidden w-full mt-2 border border-slate-300 rounded-lg p-2 text-sm outline-none focus:border-primary bg-slate-50">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Intensidad</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="intensidad" value="Leve" class="peer hidden" checked><div class="text-center py-2 rounded-lg border border-slate-200 text-slate-500 peer-checked:bg-green-100 peer-checked:text-green-700 peer-checked:border-green-300 font-bold transition text-sm">Leve</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="intensidad" value="Moderado" class="peer hidden"><div class="text-center py-2 rounded-lg border border-slate-200 text-slate-500 peer-checked:bg-yellow-100 peer-checked:text-yellow-700 peer-checked:border-yellow-300 font-bold transition text-sm">Mod.</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="intensidad" value="Intenso" class="peer hidden"><div class="text-center py-2 rounded-lg border border-slate-200 text-slate-500 peer-checked:bg-red-100 peer-checked:text-red-700 peer-checked:border-red-300 font-bold transition text-sm">Grave</div></label>
+                        </div>
+                    </div>
+
+                    <textarea id="note" class="w-full border border-slate-300 rounded-xl p-3 h-20 outline-none focus:ring-2 focus:ring-primary resize-none" placeholder="Nota adicional..."></textarea>
+                    
+                    <button type="submit" class="w-full bg-primary hover:bg-indigo-800 text-white p-4 rounded-xl shadow-lg font-bold text-lg transition-all flex justify-center items-center gap-2">
+                        <i data-lucide="save" class="w-5 h-5"></i> Guardar
+                    </button>
+
+                </form>
+
+                 
+
+            </div>
+
+             <button onclick="abrirModalAlertaSintomas()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 transition-all font-bold text-lg transform active:scale-95">
+                        <i data-lucide="alert-triangle" class="w-6 h-6"></i> Pedir Apoyo
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-6 lg:col-span-2">
+            
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-end gap-4 justify-between">
+                <div class="flex flex-wrap gap-3 items-end w-full md:w-auto">
+                    <div class="flex-1 min-w-[120px]">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Desde</label>
+                        <input id="filtroInicio" type="date" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="flex-1 min-w-[120px]">
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Hasta</label>
+                        <input id="filtroFin" type="date" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <button onclick="aplicarFiltros()" class="bg-slate-800 text-white p-2.5 rounded-lg hover:bg-slate-700 shadow-md transition-colors shrink-0">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="text-right w-full md:w-auto border-t md:border-t-0 pt-2 md:pt-0 mt-2 md:mt-0 flex justify-between md:block">
+                    <p class="text-xs text-gray-400 font-bold uppercase">Registros</p>
+                    <p id="totalCount" class="text-2xl font-black text-indigo-600">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-slate-200 h-80">
+                <h3 class="font-bold text-lg text-slate-700 mb-2">Frecuencia</h3>
+                <div class="h-64 w-full">
+                    <canvas id="symptomsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 md:p-6 rounded-2xl shadow-md border border-slate-200 flex-1 overflow-hidden flex flex-col min-h-[400px]">
+                <h3 class="font-bold text-lg text-slate-700 mb-4">Detalle</h3>
+                <div class="overflow-y-auto flex-1 pr-2">
+                    <ul id="list" class="space-y-3"></ul>
+                    <div id="emptyList" class="hidden text-center py-10 text-gray-400"><p>Sin datos.</p></div>
+                </div>
+            </div>
+            
+            <div id="symptomAlertModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity p-4">
+                <div class="bg-white p-6 rounded-2xl w-full max-w-sm space-y-5 shadow-2xl border border-slate-100">
+                    
+                    <div class="text-center space-y-3">
+                        <i data-lucide="alert-circle" class="w-12 h-12 text-red-600 mx-auto"></i>
+                        <h3 class="font-bold text-2xl text-red-600">Alerta de Emergencia</h3>
+                        <p class="text-slate-600">
+                            Estás a punto de enviar un correo urgente a <strong id="totalCuidadoresText">todos tus cuidadores</strong> solicitando apoyo.
+                        </p>
+                        <textarea id="mensajeEmergencia" class="w-full border border-slate-300 rounded-xl p-3 h-20 outline-none focus:ring-2 focus:ring-red-600 resize-none" placeholder="(opcional) Escribe un mensaje breve (ej. 'Necesito que me contacten', 'Tengo mucho dolor')..."></textarea>
+                    </div>
+
+                    <div class="flex gap-3 pt-2 border-t">
+                        <button type="button" onclick="window.toggleModal('symptomAlertModal', false)" class="flex-1 bg-gray-100 text-gray-600 p-3 rounded-xl font-bold">Cancelar</button>
+                        <button type="button" onclick="enviarAlertaEmergencia()" id="btnEnviarEmergencia" 
+                                class="flex-1 bg-red-600 text-white p-3 rounded-xl shadow-lg hover:bg-red-700 transition font-bold text-lg">
+                            <i data-lucide="send" class="w-5 h-5"></i> Enviar a Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+        </div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <script type="module" src="../assets/js/system-alarms.js"></script>
+    <script type="module" src="../assets/js/sintomas.js"></script>
+    <script>
+
+        // Función auxiliar para manejar la visibilidad de modales
+        window.toggleModal = (id, show) => { 
+            const m = document.getElementById(id); 
+            if (show) {
+                m.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Evita scroll en el fondo
+            } else {
+                m.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

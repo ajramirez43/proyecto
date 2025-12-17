@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalSync - Iniciar Sesión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        tailwind.config = { theme: { extend: { colors: { primary: "#4338ca" } } } }
+    </script>
+</head>
+<body class="bg-slate-50 h-screen flex font-sans text-slate-900">
+
+    <div class="hidden lg:flex w-1/2 bg-primary text-white flex-col justify-center items-center p-12 relative overflow-hidden">
+        <div class="z-10 flex flex-col items-center">
+            <div class="bg-white/10 p-5 rounded-full mb-6 backdrop-blur-sm border border-white/10 shadow-xl">
+                <i data-lucide="heart-pulse" class="w-16 h-16 text-white"></i>
+            </div>
+            <h1 class="text-5xl font-bold tracking-tight mb-4">VitalSync</h1>
+            <p class="text-lg text-white/80 text-center max-w-md leading-relaxed">
+                Tu salud bajo control. Monitoreo simple y recordatorios inteligentes con tecnología real.
+            </p>
+        </div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl"></div>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-300/20 rounded-full blur-2xl"></div>
+    </div>
+
+    <div class="w-full lg:w-1/2 flex justify-center items-center bg-white p-8">
+        <div class="w-full max-w-md space-y-8">
+            <div class="text-center lg:text-left">
+                <h2 class="text-3xl font-bold text-slate-800">Bienvenido</h2>
+                <p class="text-slate-500 mt-2">Ingresa tus credenciales para acceder.</p>
+            </div>
+
+            <form id="loginForm" class="space-y-6">
+                
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700 ml-1">Correo Electrónico</label>
+                    <div class="relative group">
+                        <i data-lucide="mail" class="w-5 h-5 text-gray-400 absolute left-3 top-3.5 group-focus-within:text-primary transition-colors"></i>
+                        <input id="email" type="email" placeholder="usuario@ejemplo.com" required 
+                            class="w-full border border-gray-200 bg-slate-50 p-3 pl-10 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary outline-none transition-all font-medium text-slate-700">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700 ml-1">Contraseña</label>
+                    <div class="relative group">
+                        <i data-lucide="lock" class="w-5 h-5 text-gray-400 absolute left-3 top-3.5 group-focus-within:text-primary transition-colors"></i>
+                        <input id="pass" type="password" placeholder="••••••••" required 
+                            class="w-full border border-gray-200 bg-slate-50 p-3 pl-10 rounded-xl focus:bg-white focus:ring-2 focus:ring-primary outline-none transition-all font-medium text-slate-700">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-primary text-white p-4 rounded-xl font-bold text-lg hover:bg-indigo-800 transition-all shadow-lg shadow-indigo-200 flex justify-center items-center gap-2 transform active:scale-[0.98]">
+                    <i data-lucide="log-in" class="w-5 h-5"></i> Iniciar Sesión
+                </button>
+            </form>
+
+            <p class="text-center text-sm text-slate-500">
+                ¿Aún no tienes cuenta? 
+                <a href="registro.html" class="text-primary font-bold hover:text-indigo-700 hover:underline transition-colors">Regístrate gratis</a>
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        // 1. Importaciones de Firebase (Solo lo necesario para login y estado de autenticación)
+        import { auth, signInWithEmailAndPassword, onAuthStateChanged } from '../assets/js/firebase.js';
+
+        // Inicializar iconos
+        lucide.createIcons();
+
+        /* ==========================================
+           LÓGICA DE REDIRECCIÓN GLOBAL (SOLO PACIENTE)
+           ========================================== */
+        // Verifica si el usuario ya está logueado al cargar la página
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // REDIRECCIÓN SIMPLE: Siempre redirigir al dashboard del paciente.
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+
+        /* ==========================================
+           CONTROL DEL FORMULARIO DE LOGIN
+           ========================================== */
+        const loginForm = document.getElementById('loginForm');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            const btn = e.target.querySelector('button');
+            const originalBtnText = '<i data-lucide="log-in" class="w-5 h-5"></i> Iniciar Sesión';
+
+            try {
+                // ESTADO DE CARGA
+                btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Validando...';
+                lucide.createIcons(); 
+                btn.disabled = true;
+
+                // AUTENTICACIÓN
+                await signInWithEmailAndPassword(auth, email, pass);
+                
+                // ÉXITO (SweetAlert2)
+                const Toast = Swal.mixin({
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true
+                });
+                await Toast.fire({ icon: 'success', title: '¡Bienvenido de nuevo!' });
+                
+                // onAuthStateChanged se encarga de la redirección a dashboard.html.
+
+            } catch (error) {
+                console.error("Error de login:", error);
+
+                let mensajeError = "Ocurrió un error inesperado.";
+                let tituloError = "Error de acceso";
+                
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    tituloError = "Credenciales inválidas";
+                    mensajeError = "El correo o la contraseña no coinciden.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    tituloError = "Bloqueo temporal";
+                    mensajeError = "Demasiados intentos fallidos. Por favor espera unos minutos.";
+                } else if (error.code === 'auth/network-request-failed') {
+                    tituloError = "Sin conexión";
+                    mensajeError = "Por favor verifica tu conexión a internet.";
+                }
+
+                // Mostrar alerta de error
+                Swal.fire({
+                    icon: 'error', title: tituloError, text: mensajeError, confirmButtonColor: '#4338ca', confirmButtonText: 'Intentar de nuevo'
+                });
+
+                // Restaurar botón
+                btn.innerHTML = originalBtnText;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
