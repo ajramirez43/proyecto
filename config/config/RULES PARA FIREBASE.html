@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================
+    // FUNCIÓN: verificar si el usuario es cuidador
+    // ===============================================
+    function isCaregiverOf(patientId) {
+      let patientDoc =
+        get(/databases/$(database)/documents/usuarios/$(patientId));
+      return request.auth.token.email in patientDoc.cuidadores;
+    }
+
+    // ===============================================
+    // COLECCIÓN: usuarios
+    // ===============================================
+    match /usuarios/{userId} {
+
+      // 🔎 Búsqueda inicial (necesaria para confirmar cuidador)
+      allow read: if request.auth != null;
+
+      // 👤 Paciente: control total
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId;
+
+      // 👩‍⚕️ Cuidador ya autorizado: lectura
+      allow read: if request.auth != null
+        && isCaregiverOf(userId);
+
+      // 🟢 Cuidador se agrega a sí mismo
+      allow update: if request.auth != null
+        && request.auth.token.email != null
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['cuidadores', 'cuidadoresDetalles'])
+        && request.resource.data.cuidadores
+            .hasAny([request.auth.token.email])
+        && request.resource.data.cuidadoresDetalles[request.auth.uid].email
+            == request.auth.token.email;
+    }
+
+    // ===============================================
+    // COLECCIÓN: registros_vitales (SIGNOS VITALES)
+    // ===============================================
+    match /registros_vitales/{registroId} {
+
+      // 👤 PACIENTE: crear SUS registros
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+
+      // 👤 PACIENTE: leer y actualizar SUS registros
+      allow read, update, delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+
+      // 👩‍⚕️ CUIDADOR: SOLO LECTURA
+      allow read: if request.auth != null
+        && isCaregiverOf(resource.data.uid);
+    }
+
+
+    // ===============================================
+    // COLECCIÓN: sintomas
+    // ===============================================
+    match /sintomas/{sintomaId} {
+
+      // 👤 PACIENTE: crear SUS síntomas
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+
+      // 👤 PACIENTE: leer / editar / borrar SUS síntomas
+      allow read, update, delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+
+      // 👩‍⚕️ CUIDADOR: SOLO LECTURA
+      allow read: if request.auth != null
+        && isCaregiverOf(resource.data.uid);
+    }
+
+    // ===============================================
+    // COLECCIÓN: medicamentos
+    // ===============================================
+    match /medicamentos/{medId} {
+
+      // 👤 PACIENTE: crear SUS medicamentos
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+
+      // 👤 PACIENTE: leer / editar / borrar SUS medicamentos
+      allow read, update, delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+
+      // 👩‍⚕️ CUIDADOR: leer medicamentos del paciente
+      allow read: if request.auth != null
+        && isCaregiverOf(resource.data.uid);
+
+      // 👩‍⚕️ CUIDADOR: puede crear y borrar (NO editar)
+      allow create, delete: if request.auth != null
+        && request.resource.data.uid != null
+        && isCaregiverOf(request.resource.data.uid);
+    }
+
+    // ===============================================
+    // COLECCIÓN: historial_tomas
+    // ===============================================
+    match /historial_tomas/{tomaId} {
+
+      // 👤 PACIENTE: crear su historial
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid;
+
+      // 👤 PACIENTE: leer su historial
+      allow read: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+
+      // 👩‍⚕️ CUIDADOR: solo lectura
+      allow read: if request.auth != null
+        && isCaregiverOf(resource.data.uid);
+    }
+  }
+}
